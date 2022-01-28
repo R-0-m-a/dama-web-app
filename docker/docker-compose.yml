@@ -1,0 +1,55 @@
+# Use root/example as user/password credentials
+version: '3.1'
+
+services:
+
+  mongo:
+    image: mongo
+    container_name: ${DB_HOST}
+    restart: always
+    ports:
+      - 27017:27017
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${DB_ROOT_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+      DB_USERNAME: ${DB_USER_NAME}
+      DB_PASSWORD: ${DB_USER_PASSWORD}
+      DB_NAME: ${DB_NAME}
+    volumes:
+        - ./mongo/mongo_scripts/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+        - ./mongo/mongodbdata:/data/db
+        - ./mongo/backup:/backup
+    networks:
+      - backend
+
+  dama-api:
+    image: kandratsenka/dama-api-service
+    restart: always
+    ports:
+      - 8080:8080
+    environment:
+      DB_NAME: ${DB_NAME}
+      DB_USER_NAME: ${DB_USER_NAME}
+      DB_USER_PASSWORD: ${DB_USER_PASSWORD}
+      DB_HOST: ${DB_HOST}
+      JWT_SECRET: ${JWT_SECRET}
+      LOG_DIR: ${LOG_DIR}
+    depends_on:
+      - mongo
+    networks:
+      - backend
+      - frontend
+
+  dama-ui:
+    image: kandratsenka/dama-ui
+    ports:
+      - 8082:80
+    restart: always
+    depends_on:
+      - dama-api
+    networks:
+      - frontend
+
+networks:
+  backend:
+  frontend:

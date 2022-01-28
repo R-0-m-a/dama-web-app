@@ -1,0 +1,52 @@
+@startuml
+
+!include <tupadr3/common>
+!include <tupadr3/font-awesome/server>
+!include <tupadr3/devicons/firebase>
+!include <tupadr3/devicons2/mongodb>
+!include <logos/firebase>
+!include <logos/mongodb.puml>
+
+<style>
+  title {
+    FontSize 20
+    Margin 15
+    Padding 20
+  }
+</style>
+
+title Web catalog for earrings
+
+actor user
+
+node "Dama UI" as ui
+node "Dama Api Service" as api
+
+skinparam databaseFontColor<<mongo>> green
+database "<$mongodb>" <<mongo>> as mongo
+
+interface HTTP
+
+FA_SERVER(firebase,firebase,storage,orange)
+
+note left of admin
+	  can create parts for earrings
+	  can create new earrings from existing earring details
+	  has the ability to customize parameters to calculate the total cost of earrings
+	end note
+
+note right of user
+	  can only view the existing earrings and only see the total price of the earrings
+	 end note
+
+note left of firebase: Storage for saving images
+
+:admin: -- HTTP : ""
+user -- HTTP
+HTTP -- ui
+ui -left- firebase
+ui -- api : " http"
+api -- mongo
+
+
+@enduml
